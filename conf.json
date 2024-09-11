@@ -1,0 +1,12 @@
+{
+  "settings": {
+    "nlp": {
+      "corpora": ["./src/share/dataset/corpus.json"]
+    },
+    "api-server": {
+      "port": 3009,
+      "serveBot": false
+    }
+  },
+  "use": ["Basic", "ExpressApiServer", "DirectlineConnector"]
+}

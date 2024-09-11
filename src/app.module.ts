@@ -1,6 +1,7 @@
+import { NlpServiceService } from './share/services/nlp/nlp-service.service';
 import { GreeterModule } from './Modules/greeter/greeter.module';
 import { ShareModule } from './share/share.module';
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TelegrafModule } from 'nestjs-telegraf';
@@ -20,11 +21,14 @@ import { ConfigModule } from '@nestjs/config';
       useFactory: () => ({
         token: process.env.TELEGRAM_BOT_TOKEN,
         middlewares: [sessionMiddleware, LoggerMiddleware],
-        include: [GreeterModule],
       }),
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [NlpServiceService, AppService],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  onModuleInit() {
+    /* */
+  }
+}

@@ -8,5 +8,6 @@ import { Module } from '@nestjs/common';
   imports: [],
   controllers: [],
   providers: [],
+  exports: [],
 })
 export class ShareModule {}
