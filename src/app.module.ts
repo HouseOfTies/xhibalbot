@@ -1,4 +1,3 @@
-import { NlpServiceService } from './share/services/nlp/nlp-service.service';
 import { GreeterModule } from './Modules/greeter/greeter.module';
 import { ShareModule } from './share/share.module';
 import { Module, OnModuleInit } from '@nestjs/common';
@@ -25,7 +24,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
   ],
   controllers: [AppController],
-  providers: [NlpServiceService, AppService],
+  providers: [AppService],
 })
 export class AppModule implements OnModuleInit {
   onModuleInit() {
