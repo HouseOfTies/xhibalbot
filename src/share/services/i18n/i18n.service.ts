@@ -17,14 +17,9 @@ export class I18nService {
       const filePath = path.join(localesPath, `${lang}.json`);
       if (fs.existsSync(filePath)) {
         this.translations[lang] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        console.log(
-          `✅ Traducciones cargadas para ${lang}:`,
-          this.translations[lang],
-        );
+        console.log(`✅ Translations loaded ${lang}:`, this.translations[lang]);
       } else {
-        console.error(
-          `⚠️ No se encontró el archivo de traducción: ${filePath}`,
-        );
+        console.error(`⚠️ Translations not founded into: ${filePath}`);
       }
     });
   }

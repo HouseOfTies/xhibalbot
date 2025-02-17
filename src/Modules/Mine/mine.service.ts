@@ -16,10 +16,8 @@ export class MineCommands {
     const command = 'mine';
     const cooldownSeconds = 10;
 
-    // 🔹 Obtener idioma del usuario
     const lang = ctx.from.language_code || 'en';
 
-    // 🔹 Verificar cooldown
     const cooldownCheck = await this.cooldownService.checkCooldown(
       userId,
       command,
