@@ -20,17 +20,17 @@ export class MineCommands {
     );
 
     if (!cooldownCheck.allowed) {
-      return ctx.reply(
-        `Command on cooldown. Please wait ${cooldownCheck.timeRemaining} seconds before using this command again.`,
+      ctx.reply(
+        `Command on cooldown. Please wait ${cooldownCheck?.timeRemaining} seconds before using this command again.`,
       );
+
+      return;
     }
 
-    // Your mine command logic here
     await ctx.reply(
       'Mining started! You will receive resources in a moment...',
     );
 
-    // Simulate some mining process
     setTimeout(async () => {
       await ctx.reply('Mining complete! You received 10 resources.');
     }, 2000);
