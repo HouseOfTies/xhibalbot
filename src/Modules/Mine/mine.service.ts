@@ -1,11 +1,14 @@
-// mine.command.ts
 import { Command, Ctx, Update } from 'nestjs-telegraf';
 import { RedisCooldownService } from 'src/cache/rediscooldown.service';
+import { I18nService } from 'src/share/services/i18n/i18n.service';
 import { Context } from 'telegraf';
 
 @Update()
 export class MineCommands {
-  constructor(private readonly cooldownService: RedisCooldownService) {}
+  constructor(
+    private readonly cooldownService: RedisCooldownService,
+    private readonly i18nService: I18nService,
+  ) {}
 
   @Command('mine')
   async onMineCommand(@Ctx() ctx: Context) {
@@ -13,6 +16,10 @@ export class MineCommands {
     const command = 'mine';
     const cooldownSeconds = 10;
 
+    // 🔹 Obtener idioma del usuario
+    const lang = ctx.from.language_code || 'en';
+
+    // 🔹 Verificar cooldown
     const cooldownCheck = await this.cooldownService.checkCooldown(
       userId,
       command,
@@ -21,18 +28,20 @@ export class MineCommands {
 
     if (!cooldownCheck.allowed) {
       ctx.reply(
-        `Command on cooldown. Please wait ${cooldownCheck?.timeRemaining} seconds before using this command again.`,
+        this.i18nService.translate(lang, 'commands.mine.cooldown', {
+          time: cooldownCheck.timeRemaining || 0,
+        }),
       );
 
       return;
     }
 
-    await ctx.reply(
-      'Mining started! You will receive resources in a moment...',
-    );
+    await ctx.reply(this.i18nService.translate(lang, 'commands.mine.start'));
 
     setTimeout(async () => {
-      await ctx.reply('Mining complete! You received 10 resources.');
+      await ctx.reply(
+        this.i18nService.translate(lang, 'commands.mine.complete'),
+      );
     }, 2000);
   }
 }

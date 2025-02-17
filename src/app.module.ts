@@ -1,3 +1,4 @@
+import { I18nService } from './share/services/i18n/i18n.service';
 import { MineModule } from './Modules/Mine/mine.module';
 import { RedisCooldownModule } from './cache/rediscooldown.module';
 import { GreeterModule } from './Modules/greeter/greeter.module';
@@ -30,7 +31,7 @@ import { DatabaseModule } from './database/database.module';
     RedisCooldownModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [I18nService, AppService],
 })
 export class AppModule implements OnModuleInit {
   onModuleInit() {
