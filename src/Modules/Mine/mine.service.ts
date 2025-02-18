@@ -52,5 +52,11 @@ export class MineCommands {
         loot: lootMessage,
       }),
     );
+
+    await ctx.reply(
+      this.i18nService.translate(lang, 'commands.mine.cooldown', {
+        time: cooldownSeconds,
+      }),
+    );
   }
 }

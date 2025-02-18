@@ -1,3 +1,4 @@
+import { RankModule } from './Modules/rank/rank.module';
 import { LangModule } from './Modules/lang/lang.module';
 import { I18nService } from './share/services/i18n/i18n.service';
 import { RedisCooldownModule } from './cache/rediscooldown.module';
@@ -11,6 +12,7 @@ import { BotModule } from './bot/bot.module';
 
 @Module({
   imports: [
+    RankModule,
     LangModule,
     ShareModule,
     DatabaseModule,
