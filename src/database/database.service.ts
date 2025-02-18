@@ -8,8 +8,8 @@ export class DatabaseService implements OnModuleInit {
 
   async onModuleInit() {
     console.log(
-      '📦 MongoDB conectado:',
-      this.connection.readyState === 1 ? '✅ Conectado' : '❌ Error',
+      '📦 MongoDB connected:',
+      this.connection.readyState === 1 ? '✅ Connected' : '❌ Error',
     );
   }
 }

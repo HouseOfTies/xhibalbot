@@ -17,7 +17,6 @@ export class I18nService {
       const filePath = path.join(localesPath, `${lang}.json`);
       if (fs.existsSync(filePath)) {
         this.translations[lang] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        console.log(`✅ Translations loaded ${lang}:`, this.translations[lang]);
       } else {
         console.error(`⚠️ Translations not founded into: ${filePath}`);
       }
