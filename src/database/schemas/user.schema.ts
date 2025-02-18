@@ -20,9 +20,6 @@ export class User {
   @Prop({ default: 0 })
   exp: number;
 
-  @Prop({ default: 0 })
-  gold: number;
-
   @Prop({ default: 'Normal Human' })
   vocation: string;
 
@@ -31,6 +28,15 @@ export class User {
 
   @Prop({ default: 'en' })
   language: string;
+
+  @Prop({ default: 0 })
+  goldCoins: number;
+
+  @Prop({ default: 0 })
+  platinumCoins: number;
+
+  @Prop({ default: 0 })
+  crystalCoins: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

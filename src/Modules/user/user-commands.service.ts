@@ -17,17 +17,24 @@ export class UserProfileCommand {
     const user = await this.userService.findOrCreate(userId);
 
     const profileMessage = `
-👤 **Player Profile**
-  
-🆔 **ID:** ${user.userId}  
+⚜️ **Player Profile** ⚜️
+🆔 ${user.userId}
+
 ❤️ **HP:** ${user.hp} / 100  
-💧 **Mana:** ${user.mana} / 100  
+💧 **Mana:** ${user.mana} / 100
+
 ⭐ **Level:** ${user.level}  
 🎖 **EXP:** ${user.exp}  
-💰 **Gold:** ${user.gold}  
-⚔ **Vocation:** ${user.vocation}  
+
+💰 **Money:**
+   - 🪙 **Gold Coins:** ${user.goldCoins}  
+   - 💵 **Platinum Coins:** ${user.platinumCoins}  
+   - 💎 **Crystal Coins:** ${user.crystalCoins}  
+
+⚔ **Vocation:** ${user.vocation || 'Not Defined'}  
+
 🌎 **Language:** ${user.language.toUpperCase()}  
-  `;
+`;
 
     ctx.reply(profileMessage, { parse_mode: 'Markdown' });
     return;

@@ -16,7 +16,7 @@ export class MineCommands {
   async onMineCommand(@Ctx() ctx: Context) {
     const userId = ctx.from.id.toString();
     const command = 'mine';
-    const cooldownSeconds = 10;
+    const cooldownSeconds = 60;
 
     const user = await this.userService.getUser(userId);
     const lang = user?.language || 'en';
@@ -39,10 +39,18 @@ export class MineCommands {
 
     await ctx.reply(this.i18nService.translate(lang, 'commands.mine.start'));
 
-    setTimeout(async () => {
-      await ctx.reply(
-        this.i18nService.translate(lang, 'commands.mine.complete'),
-      );
-    }, 2000);
+    const goldEarned = Math.floor(Math.random() * 20) + 5;
+    user.goldCoins += goldEarned;
+    await user.save();
+
+    const lootMessage = this.i18nService.translate(lang, 'commands.mine.loot', {
+      gold: goldEarned,
+    });
+
+    await ctx.reply(
+      this.i18nService.translate(lang, 'commands.mine.complete', {
+        loot: lootMessage,
+      }),
+    );
   }
 }
