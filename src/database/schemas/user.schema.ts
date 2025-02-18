@@ -29,7 +29,7 @@ export class User {
   @Prop({ default: [] })
   inventory: string[];
 
-  @Prop({ default: 'es' })
+  @Prop({ default: 'en' })
   language: string;
 }
 

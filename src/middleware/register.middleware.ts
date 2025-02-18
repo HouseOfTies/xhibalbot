@@ -1,21 +1,20 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Context } from 'telegraf';
-import { NextFunction } from 'express';
+// import { UserService } from 'src/Modules/user/user.service';
 import { UserService } from 'src/Modules/user/user.service';
+import { Context, MiddlewareFn } from 'telegraf';
 
-@Injectable()
-export class RegisterMiddleware implements NestMiddleware {
-  constructor(private readonly userService: UserService) {}
-
-  async use(ctx: Context, next: NextFunction) {
-    if (!ctx.from) return next(); // Si el mensaje no tiene un usuario, lo ignoramos
+export const RegisterMiddleware =
+  (userService: UserService): MiddlewareFn<Context> =>
+  async (ctx, next) => {
+    if (!ctx.from) return next(); // Ignorar si no hay usuario asociado
 
     const userId = ctx.from.id.toString();
-    const language = ctx.from.language_code || 'en';
 
-    // Intentar registrar al usuario si no existe
-    await this.userService.findOrCreate(userId, language);
+    // Verificar si el usuario ya está registrado
+    const user = await userService.getUser(userId);
+    if (!user) {
+      await userService.findOrCreate(userId);
+      console.log(`✅ Usuario ${userId} registrado automáticamente.`);
+    }
 
-    return next(); // Continuar con la ejecución normal
-  }
-}
+    return next();
+  };

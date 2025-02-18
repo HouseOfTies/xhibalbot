@@ -14,6 +14,6 @@ import { UserProfileCommand } from './user-commands.service';
   ],
   controllers: [],
   providers: [UserService, UserProfileCommand],
-  exports: [],
+  exports: [UserService],
 })
 export class UserModule {}

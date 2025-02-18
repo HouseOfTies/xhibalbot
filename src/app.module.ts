@@ -4,7 +4,7 @@ import { MineModule } from './Modules/Mine/mine.module';
 import { RedisCooldownModule } from './cache/rediscooldown.module';
 import { GreeterModule } from './Modules/greeter/greeter.module';
 import { ShareModule } from './share/share.module';
-import { MiddlewareConsumer, Module, OnModuleInit } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TelegrafModule } from 'nestjs-telegraf';

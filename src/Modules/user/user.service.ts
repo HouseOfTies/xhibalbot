@@ -7,13 +7,12 @@ import { User, UserDocument } from 'src/database/schemas/user.schema';
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async findOrCreate(userId: string, language?: string): Promise<User> {
+  async findOrCreate(userId: string): Promise<User> {
     let user = await this.userModel.findOne({ userId });
 
     if (!user) {
       user = new this.userModel({
         userId,
-        language: language || 'en',
       });
       await user.save();
     }
