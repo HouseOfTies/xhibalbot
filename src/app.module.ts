@@ -7,11 +7,9 @@ import { ShareModule } from './share/share.module';
 import { Module, OnModuleInit } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TelegrafModule } from 'nestjs-telegraf';
-import { sessionMiddleware } from './middleware/session.middleware';
-import { LoggerMiddleware } from './middleware/logger.middleware';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
+import { BotModule } from './bot/bot.module';
 
 @Module({
   imports: [
@@ -23,13 +21,7 @@ import { DatabaseModule } from './database/database.module';
     ConfigModule.forRoot({
       envFilePath: ['.env'],
     }),
-    TelegrafModule.forRootAsync({
-      botName: 'XhibalbaBot',
-      useFactory: () => ({
-        token: process.env.TELEGRAM_BOT_TOKEN,
-        middlewares: [sessionMiddleware, LoggerMiddleware],
-      }),
-    }),
+    BotModule,
     RedisCooldownModule,
   ],
   controllers: [AppController],
