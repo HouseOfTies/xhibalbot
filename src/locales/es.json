@@ -1,0 +1,9 @@
+{
+  "commands": {
+    "mine": {
+      "start": "¡Minería iniciada! Recibirás recursos pronto...",
+      "complete": "¡Minería completada! Recibiste 10 recursos.",
+      "cooldown": "Comando en enfriamiento. Por favor espera {time} segundos antes de volver a usar este comando."
+    }
+  }
+}
