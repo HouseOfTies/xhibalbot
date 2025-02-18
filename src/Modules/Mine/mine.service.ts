@@ -2,12 +2,14 @@ import { Command, Ctx, Update } from 'nestjs-telegraf';
 import { RedisCooldownService } from 'src/cache/rediscooldown.service';
 import { I18nService } from 'src/share/services/i18n/i18n.service';
 import { Context } from 'telegraf';
+import { UserService } from '../user/user.service';
 
 @Update()
 export class MineCommands {
   constructor(
     private readonly cooldownService: RedisCooldownService,
     private readonly i18nService: I18nService,
+    private readonly userService: UserService,
   ) {}
 
   @Command('mine')
@@ -16,7 +18,8 @@ export class MineCommands {
     const command = 'mine';
     const cooldownSeconds = 10;
 
-    const lang = ctx.from.language_code || 'en';
+    const user = await this.userService.getUser(userId);
+    const lang = user?.language || 'en';
 
     const cooldownCheck = await this.cooldownService.checkCooldown(
       userId,

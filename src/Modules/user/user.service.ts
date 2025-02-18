@@ -31,4 +31,8 @@ export class UserService {
       .findOneAndUpdate({ userId }, updateData, { new: true })
       .exec();
   }
+
+  async updateLanguage(userId: string, language: 'en' | 'es'): Promise<void> {
+    await this.userModel.updateOne({ userId }, { $set: { language } });
+  }
 }
