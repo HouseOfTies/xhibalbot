@@ -20,6 +20,9 @@ export class User {
   @Prop({ default: 0 })
   exp: number;
 
+  @Prop({ default: 1 })
+  miningLevel: number;
+
   @Prop({ default: 'Normal Human' })
   vocation: string;
 

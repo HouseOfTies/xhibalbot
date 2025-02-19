@@ -5,16 +5,24 @@ import { UpdateType as TelegrafUpdateType } from 'telegraf/typings/telegram-type
 import { Command, Ctx, Update } from 'nestjs-telegraf';
 import { Context } from 'telegraf';
 import { UserService } from './user.service';
+import { ExperienceService } from 'src/share/services/experience/experience.service';
 
 @Update()
 export class UserProfileCommand {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private experienceService: ExperienceService,
+  ) {}
 
   @Command('profile')
   async onProfileCommand(@Ctx() ctx: Context) {
     const userId = ctx.from.id.toString();
 
     const user = await this.userService.findOrCreate(userId);
+
+    const requiredExp = this.experienceService.getRequiredExp(user.level);
+
+    const expPercentage = ((user.exp / requiredExp) * 100).toFixed(1);
 
     const profileMessage = `
 ⚜️ **Player Profile** ⚜️
@@ -24,7 +32,7 @@ export class UserProfileCommand {
 💧 **Mana:** ${user.mana} / 100
 
 ⭐ **Level:** ${user.level}  
-🎖 **EXP:** ${user.exp}  
+🎖 **EXP:** ${user.exp} / ${requiredExp} (${expPercentage}%)  
 
 💰 **Money:**
    - 🪙 **Gold Coins:** ${user.goldCoins}  

@@ -4,7 +4,8 @@
       "start": "¡Minería iniciada! Recibirás recursos pronto...",
       "complete": "⛏ ¡Has terminado de minar!\n{loot}",
       "loot": "💎 Resultados de minería:\n 🪙 Monedas de Oro: {gold}\n",
-      "cooldown": "⏳ Debes esperar {time} segundos antes de volver a minar."
+      "cooldown": "⏳ Debes esperar {time} segundos antes de volver a minar.",
+      "levelUp": "🎉 ¡Felicidades! Has subido al **Nivel {level}**!"
     }
   }
 }

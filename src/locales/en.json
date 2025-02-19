@@ -3,8 +3,9 @@
     "mine": {
       "start": "Mining started! You will receive resources soon...",
       "complete": "⛏ You finished mining!\n{loot}",
-      "loot": "💎 Mining Results:\n 🪙 Gold Coins: {gold}\n",
-      "cooldown": "⏳ You must wait {time} seconds before mining again!"
+      "loot": "Mining Results:\n  - 🪙 Gold Coins: {gold}\n  - ✨ EXP Gained: {exp}\n",
+      "cooldown": "⏳ You must wait {time} seconds before mining again!",
+      "levelUp": "🎉 Congratulations! You leveled up to **Level {level}**!"
     }
   }
 }

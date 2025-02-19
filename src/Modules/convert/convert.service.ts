@@ -15,18 +15,40 @@ export class ConvertCommand {
     }
 
     const [from, amount] = args;
-    if (!['gold', 'platinum'].includes(from) || isNaN(Number(amount))) {
+    const amountNum = Number(amount);
+
+    if (
+      !['gold', 'platinum'].includes(from) ||
+      isNaN(amountNum) ||
+      amountNum <= 0
+    ) {
       return ctx.reply('❌ Invalid arguments. Use /convert gold 500.');
     }
 
-    const result = await this.userService.convertCoins(
-      userId,
-      from as 'gold' | 'platinum',
-      Number(amount),
-    );
+    const user = await this.userService.getUser(userId);
+    if (!user) {
+      return ctx.reply('❌ User not found.');
+    }
 
-    ctx.reply(result);
-    console.log(result);
-    return;
+    let message: string;
+
+    if (from === 'gold') {
+      if (user.goldCoins < amountNum) {
+        return ctx.reply('❌ Not enough Gold Coins.');
+      }
+      user.goldCoins -= amountNum;
+      user.platinumCoins += Math.floor(amountNum / 100);
+      message = `✅ Successfully converted ${amountNum} Gold Coins to ${Math.floor(amountNum / 100)} Platinum Coins.`;
+    } else if (from === 'platinum') {
+      if (user.platinumCoins < amountNum) {
+        return ctx.reply('❌ Not enough Platinum Coins.');
+      }
+      user.platinumCoins -= amountNum;
+      user.crystalCoins += Math.floor(amountNum / 100);
+      message = `✅ Successfully converted ${amountNum} Platinum Coins to ${Math.floor(amountNum / 100)} Crystal Coins.`;
+    }
+
+    await user.save();
+    return ctx.reply(message);
   }
 }
