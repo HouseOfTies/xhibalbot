@@ -9,7 +9,7 @@ export class User {
   userId: string;
 
   @Prop({ default: 100 })
-  hp: number;
+  health: number;
 
   @Prop({ default: 100 })
   mana: number;

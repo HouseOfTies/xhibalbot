@@ -7,6 +7,7 @@ import { LoggerMiddleware } from '../middleware/logger.middleware';
 import { RegisterMiddleware } from 'src/middleware/register.middleware';
 import { MineModule } from 'src/Modules/mine/mine.module';
 import { GreeterModule } from 'src/Modules/greeter/greeter.module';
+import { HuntModule } from 'src/Modules/hunt/hunt.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { GreeterModule } from 'src/Modules/greeter/greeter.module';
     MineModule,
     GreeterModule,
     UserModule,
+    HuntModule,
     TelegrafModule.forRootAsync({
       botName: 'XhibalbaBot',
       imports: [UserModule],

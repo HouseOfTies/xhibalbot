@@ -36,7 +36,7 @@ export class UserProfileCommand {
 ⚜️ **Player Profile** ⚜️
 🆔 ${user.userId}
 
-❤️ **HP:** ${user.hp} / 100  
+❤️ **HP:** ${user.health} / 100  
 💧 **Mana:** ${user.mana} / 100
 
 ⭐ **Level:** ${user.level}  
