@@ -6,6 +6,11 @@
       "loot": "Mining Results:\n  - 🪙 Gold Coins: {gold}\n  - ✨ EXP Gained: {exp}\n",
       "cooldown": "⏳ You must wait {time} seconds before mining again!",
       "levelUp": "🎉 Congratulations! You leveled up to **Level {level}**!"
-    }
+    },
+    "progression": {
+    "reward": "🎖 **Reward Received:**\n   - ✨ **EXP:** {exp}\n   - ⛏️ **Mining EXP:** {miningExp}\n   - 🪙 **Gold Coins:** {gold}",
+    "levelUp": "🎉 Congratulations! You have leveled up to **Level {level}**!",
+    "miningLevelUp": "⛏️ Your Mining Level has increased to **{miningLevel}**!"
+  }
   }
 }
