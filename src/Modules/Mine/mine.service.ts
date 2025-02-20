@@ -11,16 +11,17 @@ export class MineCommands {
   private readonly GOLD_MAX = 10;
   private readonly EXP_MIN = 10;
   private readonly EXP_MAX = 15;
+  private readonly MINING_EXP_MIN = 5;
+  private readonly MINING_EXP_MAX = 10;
 
   constructor(
     private readonly cooldownService: RedisCooldownService,
     private readonly i18nService: I18nService,
-    private readonly progressionService: ProgressionService, // ✅ Usamos ProgressionService
+    private readonly progressionService: ProgressionService,
   ) {}
 
   @Command('mine')
   async onMineCommand(@Ctx() ctx: Context) {
-    /* TODO: Arreglar el progressionService */
     const userId = ctx.from.id.toString();
     const user = await this.progressionService.userService.getUser(userId);
     if (!user) return;
@@ -69,6 +70,7 @@ export class MineCommands {
   private async processMiningResults(
     ctx: Context,
     user: any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     lang: string,
   ): Promise<void> {
     const goldEarned = this.calculateEarnings(
@@ -81,24 +83,31 @@ export class MineCommands {
       this.EXP_MIN,
       this.EXP_MAX,
     );
+    const miningExpEarned = this.calculateEarnings(
+      user.miningLevel,
+      this.MINING_EXP_MIN,
+      this.MINING_EXP_MAX,
+    );
 
     await this.progressionService.updateProgress(
       user.userId,
       ctx,
       expEarned,
       goldEarned,
+      miningExpEarned,
     );
 
-    const lootMessage = this.i18nService.translate(lang, 'commands.mine.loot', {
+    /* const lootMessage = this.i18nService.translate(lang, 'commands.mine.loot', {
       gold: goldEarned,
       exp: expEarned,
+      miningExp: miningExpEarned,
     });
-
-    await ctx.reply(
+ */
+    /* await ctx.reply(
       this.i18nService.translate(lang, 'commands.mine.complete', {
         loot: lootMessage,
       }),
-    );
+    ); */
   }
 
   private calculateEarnings(level: number, min: number, max: number): number {

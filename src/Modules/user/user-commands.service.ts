@@ -21,8 +21,16 @@ export class UserProfileCommand {
     const user = await this.userService.findOrCreate(userId);
 
     const requiredExp = this.experienceService.getRequiredExp(user.level);
+    const expPercentage =
+      requiredExp > 0 ? ((user.exp / requiredExp) * 100).toFixed(1) : '0';
 
-    const expPercentage = ((user.exp / requiredExp) * 100).toFixed(1);
+    const miningRequiredExp = this.experienceService.getRequiredMiningExp(
+      user.miningLevel,
+    );
+    const miningExpPercentage =
+      miningRequiredExp > 0
+        ? ((user.miningExp / miningRequiredExp) * 100).toFixed(1)
+        : '0';
 
     const profileMessage = `
 ⚜️ **Player Profile** ⚜️
@@ -35,6 +43,7 @@ export class UserProfileCommand {
 🎖 **EXP:** ${user.exp} / ${requiredExp} (${expPercentage}%)
 
 ⛏️ **Mining Level:** ${user.miningLevel}
+🎖 **Mining EXP:** ${user.miningExp} / ${miningRequiredExp} (${miningExpPercentage}%)
 
 💰 **Money:**
    - 🪙 **Gold Coins:** ${user.goldCoins}  
