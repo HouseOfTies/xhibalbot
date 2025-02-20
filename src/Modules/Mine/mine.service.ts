@@ -2,66 +2,92 @@ import { Command, Ctx, Update } from 'nestjs-telegraf';
 import { RedisCooldownService } from 'src/cache/rediscooldown.service';
 import { I18nService } from 'src/share/services/i18n/i18n.service';
 import { Context } from 'telegraf';
-import { UserService } from '../user/user.service';
-import { ExperienceService } from 'src/share/services/experience/experience.service';
+import { ProgressionService } from 'src/share/services/progression/progression.service';
 
 @Update()
 export class MineCommands {
+  private readonly BASE_COOLDOWN = 60;
+  private readonly GOLD_MIN = 5;
+  private readonly GOLD_MAX = 10;
+  private readonly EXP_MIN = 10;
+  private readonly EXP_MAX = 15;
+
   constructor(
     private readonly cooldownService: RedisCooldownService,
     private readonly i18nService: I18nService,
-    private readonly userService: UserService,
-    private readonly experienceService: ExperienceService,
+    private readonly progressionService: ProgressionService, // ✅ Usamos ProgressionService
   ) {}
 
   @Command('mine')
   async onMineCommand(@Ctx() ctx: Context) {
+    /* TODO: Arreglar el progressionService */
     const userId = ctx.from.id.toString();
-    const command = 'mine';
-    const user = await this.userService.getUser(userId);
-    const baseCooldown = 60;
-    const cooldownSeconds = baseCooldown + (user.level - 1) * 5;
+    const user = await this.progressionService.userService.getUser(userId);
+    if (!user) return;
 
-    const lang = user?.language || 'en';
+    const lang = user.language || 'en';
+    const cooldownSeconds = this.calculateCooldown(user.level);
 
+    if (!(await this.checkCooldown(ctx, userId, cooldownSeconds, lang))) return;
+
+    await this.startMining(ctx, lang);
+    await this.processMiningResults(ctx, user, lang);
+    await this.notifyCooldown(ctx, lang, cooldownSeconds);
+  }
+
+  private calculateCooldown(level: number): number {
+    return this.BASE_COOLDOWN + (level - 1) * 5;
+  }
+
+  private async checkCooldown(
+    ctx: Context,
+    userId: string,
+    cooldown: number,
+    lang: string,
+  ): Promise<boolean> {
     const cooldownCheck = await this.cooldownService.checkCooldown(
       userId,
-      command,
-      cooldownSeconds,
+      'mine',
+      cooldown,
     );
 
     if (!cooldownCheck.allowed) {
-      ctx.reply(
+      await ctx.reply(
         this.i18nService.translate(lang, 'commands.mine.cooldown', {
           time: cooldownCheck.timeRemaining || 0,
         }),
       );
-
-      return;
+      return false;
     }
+    return true;
+  }
 
+  private async startMining(ctx: Context, lang: string): Promise<void> {
     await ctx.reply(this.i18nService.translate(lang, 'commands.mine.start'));
+  }
 
-    const goldEarned = Math.floor(Math.random() * 10) + 5 + user.miningLevel;
-    const expEarned = Math.floor(Math.random() * 15) + 10 + user.miningLevel;
+  private async processMiningResults(
+    ctx: Context,
+    user: any,
+    lang: string,
+  ): Promise<void> {
+    const goldEarned = this.calculateEarnings(
+      user.miningLevel,
+      this.GOLD_MIN,
+      this.GOLD_MAX,
+    );
+    const expEarned = this.calculateEarnings(
+      user.miningLevel,
+      this.EXP_MIN,
+      this.EXP_MAX,
+    );
 
-    user.goldCoins += goldEarned;
-    user.exp += expEarned;
-    user.miningLevel += 1;
-    await user.save();
-
-    const requiredExp = this.experienceService.getRequiredExp(user.level);
-    if (user.exp >= requiredExp) {
-      user.level += 1;
-      user.exp = 0;
-      await user.save();
-
-      await ctx.reply(
-        this.i18nService.translate(lang, 'commands.mine.levelUp', {
-          level: user.level,
-        }),
-      );
-    }
+    await this.progressionService.updateProgress(
+      user.userId,
+      ctx,
+      expEarned,
+      goldEarned,
+    );
 
     const lootMessage = this.i18nService.translate(lang, 'commands.mine.loot', {
       gold: goldEarned,
@@ -73,7 +99,17 @@ export class MineCommands {
         loot: lootMessage,
       }),
     );
+  }
 
+  private calculateEarnings(level: number, min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min + level;
+  }
+
+  private async notifyCooldown(
+    ctx: Context,
+    lang: string,
+    cooldownSeconds: number,
+  ): Promise<void> {
     await ctx.reply(
       this.i18nService.translate(lang, 'commands.mine.cooldown', {
         time: cooldownSeconds,

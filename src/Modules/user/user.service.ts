@@ -35,26 +35,4 @@ export class UserService {
   async updateLanguage(userId: string, language: 'en' | 'es'): Promise<void> {
     await this.userModel.updateOne({ userId }, { $set: { language } });
   }
-
-  async convertCoins(
-    userId: string,
-    from: 'gold' | 'platinum',
-    amount: number,
-  ): Promise<string> {
-    const user = await this.getUser(userId);
-    if (!user) return '❌ User not found.';
-
-    if (from === 'gold') {
-      if (user.goldCoins < amount) return '❌ Not enough Gold Coins.';
-      user.goldCoins -= amount;
-      user.platinumCoins += Math.floor(amount / 100);
-    } else if (from === 'platinum') {
-      if (user.platinumCoins < amount) return '❌ Not enough Platinum Coins.';
-      user.platinumCoins -= amount;
-      user.crystalCoins += Math.floor(amount / 100);
-    }
-
-    await user.save();
-    return;
-  }
 }

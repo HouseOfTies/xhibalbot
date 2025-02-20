@@ -49,6 +49,7 @@ export class ConvertCommand {
     }
 
     await user.save();
-    return ctx.reply(message);
+    ctx.reply(message);
+    return;
   }
 }

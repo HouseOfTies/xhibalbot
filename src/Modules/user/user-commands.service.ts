@@ -32,7 +32,9 @@ export class UserProfileCommand {
 💧 **Mana:** ${user.mana} / 100
 
 ⭐ **Level:** ${user.level}  
-🎖 **EXP:** ${user.exp} / ${requiredExp} (${expPercentage}%)  
+🎖 **EXP:** ${user.exp} / ${requiredExp} (${expPercentage}%)
+
+⛏️ **Mining Level:** ${user.miningLevel}
 
 💰 **Money:**
    - 🪙 **Gold Coins:** ${user.goldCoins}  
