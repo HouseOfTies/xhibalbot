@@ -2,47 +2,127 @@ import { Command, Ctx, Update } from 'nestjs-telegraf';
 import { RedisCooldownService } from 'src/cache/rediscooldown.service';
 import { I18nService } from 'src/share/services/i18n/i18n.service';
 import { Context } from 'telegraf';
-import { UserService } from '../user/user.service';
+import { ProgressionService } from 'src/share/services/progression/progression.service';
 
 @Update()
 export class MineCommands {
+  private readonly BASE_COOLDOWN = 60;
+  private readonly GOLD_MIN = 5;
+  private readonly GOLD_MAX = 10;
+  private readonly EXP_MIN = 10;
+  private readonly EXP_MAX = 15;
+  private readonly MINING_EXP_MIN = 5;
+  private readonly MINING_EXP_MAX = 10;
+
   constructor(
     private readonly cooldownService: RedisCooldownService,
     private readonly i18nService: I18nService,
-    private readonly userService: UserService,
+    private readonly progressionService: ProgressionService,
   ) {}
 
   @Command('mine')
   async onMineCommand(@Ctx() ctx: Context) {
     const userId = ctx.from.id.toString();
-    const command = 'mine';
-    const cooldownSeconds = 10;
+    const user = await this.progressionService.userService.getUser(userId);
+    if (!user) return;
 
-    const user = await this.userService.getUser(userId);
-    const lang = user?.language || 'en';
+    const lang = user.language || 'en';
+    const cooldownSeconds = this.calculateCooldown(user.level);
 
+    if (!(await this.checkCooldown(ctx, userId, cooldownSeconds, lang))) return;
+
+    await this.startMining(ctx, lang);
+    await this.processMiningResults(ctx, user, lang);
+    await this.notifyCooldown(ctx, lang, cooldownSeconds);
+  }
+
+  private calculateCooldown(level: number): number {
+    return this.BASE_COOLDOWN + (level - 1) * 5;
+  }
+
+  private async checkCooldown(
+    ctx: Context,
+    userId: string,
+    cooldown: number,
+    lang: string,
+  ): Promise<boolean> {
     const cooldownCheck = await this.cooldownService.checkCooldown(
       userId,
-      command,
-      cooldownSeconds,
+      'mine',
+      cooldown,
     );
 
     if (!cooldownCheck.allowed) {
-      ctx.reply(
+      await ctx.reply(
         this.i18nService.translate(lang, 'commands.mine.cooldown', {
           time: cooldownCheck.timeRemaining || 0,
         }),
       );
-
-      return;
+      return false;
     }
+    return true;
+  }
 
+  private async startMining(ctx: Context, lang: string): Promise<void> {
     await ctx.reply(this.i18nService.translate(lang, 'commands.mine.start'));
+  }
 
-    setTimeout(async () => {
-      await ctx.reply(
-        this.i18nService.translate(lang, 'commands.mine.complete'),
-      );
-    }, 2000);
+  private async processMiningResults(
+    ctx: Context,
+    user: any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    lang: string,
+  ): Promise<void> {
+    const goldEarned = this.calculateEarnings(
+      user.miningLevel,
+      this.GOLD_MIN,
+      this.GOLD_MAX,
+    );
+    const expEarned = this.calculateEarnings(
+      user.miningLevel,
+      this.EXP_MIN,
+      this.EXP_MAX,
+    );
+    const miningExpEarned = this.calculateEarnings(
+      user.miningLevel,
+      this.MINING_EXP_MIN,
+      this.MINING_EXP_MAX,
+    );
+
+    await this.progressionService.updateProgress(
+      user.userId,
+      ctx,
+      expEarned,
+      goldEarned,
+      miningExpEarned,
+    );
+
+    /* const lootMessage = this.i18nService.translate(lang, 'commands.mine.loot', {
+      gold: goldEarned,
+      exp: expEarned,
+      miningExp: miningExpEarned,
+    });
+ */
+    /* await ctx.reply(
+      this.i18nService.translate(lang, 'commands.mine.complete', {
+        loot: lootMessage,
+      }),
+    ); */
+  }
+
+  private calculateEarnings(level: number, min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min + level;
+  }
+
+  private async notifyCooldown(
+    ctx: Context,
+    lang: string,
+    cooldownSeconds: number,
+  ): Promise<void> {
+    await ctx.reply(
+      this.i18nService.translate(lang, 'commands.mine.cooldown', {
+        time: cooldownSeconds,
+      }),
+    );
   }
 }

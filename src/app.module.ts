@@ -1,5 +1,5 @@
+import { ConvertModule } from './Modules/convert/convert.module';
 import { LangModule } from './Modules/lang/lang.module';
-import { I18nService } from './share/services/i18n/i18n.service';
 import { RedisCooldownModule } from './cache/rediscooldown.module';
 import { ShareModule } from './share/share.module';
 import { Module, OnModuleInit } from '@nestjs/common';
@@ -11,6 +11,7 @@ import { BotModule } from './bot/bot.module';
 
 @Module({
   imports: [
+    ConvertModule,
     LangModule,
     ShareModule,
     DatabaseModule,
@@ -21,7 +22,7 @@ import { BotModule } from './bot/bot.module';
     RedisCooldownModule,
   ],
   controllers: [AppController],
-  providers: [I18nService, AppService],
+  providers: [AppService],
 })
 export class AppModule implements OnModuleInit {
   onModuleInit() {

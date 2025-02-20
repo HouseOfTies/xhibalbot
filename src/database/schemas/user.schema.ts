@@ -21,7 +21,10 @@ export class User {
   exp: number;
 
   @Prop({ default: 0 })
-  gold: number;
+  miningExp: number;
+
+  @Prop({ default: 1 })
+  miningLevel: number;
 
   @Prop({ default: 'Normal Human' })
   vocation: string;
@@ -31,6 +34,15 @@ export class User {
 
   @Prop({ default: 'en' })
   language: string;
+
+  @Prop({ default: 0 })
+  goldCoins: number;
+
+  @Prop({ default: 0 })
+  platinumCoins: number;
+
+  @Prop({ default: 0 })
+  crystalCoins: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

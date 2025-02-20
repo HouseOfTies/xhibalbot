@@ -19,7 +19,7 @@ export class UserService {
 
     return user;
   }
-  async getUser(userId: string): Promise<User | null> {
+  async getUser(userId: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ userId }).exec();
   }
 
