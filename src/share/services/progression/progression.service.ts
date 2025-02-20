@@ -6,7 +6,6 @@ import { I18nService } from 'src/share/services/i18n/i18n.service';
 
 @Injectable()
 export class ProgressionService {
-  /* TODO: Fix values response in i18n, it seems like exp: {12} */
   constructor(
     public readonly userService: UserService,
     private readonly experienceService: ExperienceService,
@@ -71,7 +70,6 @@ export class ProgressionService {
     );
 
     await ctx.reply(rewardMessage, { parse_mode: 'Markdown' });
-    console.log(rewardMessage);
     if (levelUpMessage)
       await ctx.reply(levelUpMessage, { parse_mode: 'Markdown' });
     if (miningLevelUpMessage)
