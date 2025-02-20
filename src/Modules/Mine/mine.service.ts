@@ -23,7 +23,7 @@ export class MineCommands {
   @Command('mine')
   async onMineCommand(@Ctx() ctx: Context) {
     const userId = ctx.from.id.toString();
-    const user = await this.progressionService.userService.getUser(userId);
+    const user = await this.progressionService.playerService.getUser(userId);
     if (!user) return;
 
     const lang = user.language || 'en';

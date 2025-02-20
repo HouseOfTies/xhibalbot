@@ -1,11 +1,11 @@
 import { Command, Ctx, Update, Action } from 'nestjs-telegraf';
 import { Context } from 'telegraf';
 import { Markup } from 'telegraf';
-import { UserService } from '../user/user.service';
+import { PlayerService } from '../player/player.service';
 
 @Update()
 export class LanguageCommand {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly playerService: PlayerService) {}
 
   @Command('lang')
   async onLangCommand(@Ctx() ctx: Context) {
@@ -36,7 +36,7 @@ export class LanguageCommand {
     message: string,
   ) {
     const userId = ctx.from.id.toString();
-    await this.userService.updateLanguage(userId, language);
+    await this.playerService.updateLanguage(userId, language);
     await ctx.answerCbQuery();
     await ctx.reply(message);
   }

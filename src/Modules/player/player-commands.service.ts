@@ -1,16 +1,12 @@
-/* import { Start, Update, Sender, Command } from 'nestjs-telegraf';
-import { UpdateType } from 'src/common/decorators/update-type.decorator';
-import { UpdateType as TelegrafUpdateType } from 'telegraf/typings/telegram-types'; */
-
 import { Command, Ctx, Update } from 'nestjs-telegraf';
 import { Context } from 'telegraf';
-import { UserService } from './user.service';
+import { PlayerService } from './player.service';
 import { ExperienceService } from 'src/share/services/experience/experience.service';
 
 @Update()
-export class UserProfileCommand {
+export class PlayerProfileCommand {
   constructor(
-    private userService: UserService,
+    private playerService: PlayerService,
     private experienceService: ExperienceService,
   ) {}
 
@@ -18,7 +14,7 @@ export class UserProfileCommand {
   async onProfileCommand(@Ctx() ctx: Context) {
     const userId = ctx.from.id.toString();
 
-    const user = await this.userService.findOrCreate(userId);
+    const user = await this.playerService.findOrCreate(userId);
 
     const requiredExp = this.experienceService.getRequiredExp(user.level);
     const expPercentage =

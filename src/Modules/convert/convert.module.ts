@@ -1,4 +1,4 @@
-import { UserModule } from '../user/user.module';
+import { UserModule } from '../player/player.module';
 import { ConvertCommand } from './convert.service';
 /*
 https://docs.nestjs.com/modules

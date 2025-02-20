@@ -6,7 +6,7 @@ import { Module } from '@nestjs/common';
 import { MineCommands } from './mine.service';
 import { RedisCooldownModule } from 'src/cache/rediscooldown.module';
 import { I18nService } from 'src/share/services/i18n/i18n.service';
-import { UserModule } from '../user/user.module';
+import { UserModule } from '../player/player.module';
 import { ShareModule } from 'src/share/share.module';
 import { ExperienceService } from 'src/share/services/experience/experience.service';
 

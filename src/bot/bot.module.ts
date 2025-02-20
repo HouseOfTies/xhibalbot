@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TelegrafModule } from 'nestjs-telegraf';
-import { UserModule } from '../Modules/user/user.module';
-import { UserService } from '../Modules/user/user.service';
+import { UserModule } from '../Modules/player/player.module';
+import { PlayerService } from '../Modules/player/player.service';
 import { sessionMiddleware } from '../middleware/session.middleware';
 import { LoggerMiddleware } from '../middleware/logger.middleware';
 import { RegisterMiddleware } from 'src/middleware/register.middleware';
@@ -19,13 +19,13 @@ import { HuntModule } from 'src/Modules/hunt/hunt.module';
     TelegrafModule.forRootAsync({
       botName: 'XhibalbaBot',
       imports: [UserModule],
-      inject: [UserService],
-      useFactory: (userService: UserService) => ({
+      inject: [PlayerService],
+      useFactory: (playerService: PlayerService) => ({
         token: process.env.TELEGRAM_BOT_TOKEN,
         middlewares: [
           sessionMiddleware,
           LoggerMiddleware,
-          RegisterMiddleware(userService),
+          RegisterMiddleware(playerService),
         ],
       }),
     }),

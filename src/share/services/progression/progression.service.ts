@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserService } from 'src/Modules/user/user.service';
+import { PlayerService } from 'src/Modules/player/player.service';
 import { Context } from 'telegraf';
 import { ExperienceService } from '../experience/experience.service';
 import { I18nService } from 'src/share/services/i18n/i18n.service';
@@ -7,7 +7,7 @@ import { I18nService } from 'src/share/services/i18n/i18n.service';
 @Injectable()
 export class ProgressionService {
   constructor(
-    public readonly userService: UserService,
+    public readonly playerService: PlayerService,
     private readonly experienceService: ExperienceService,
     private readonly i18nService: I18nService,
   ) {}
@@ -19,7 +19,7 @@ export class ProgressionService {
     gold: number,
     miningExp: number,
   ) {
-    const user = await this.userService.getUser(userId);
+    const user = await this.playerService.getUser(userId);
     if (!user) return;
 
     const lang = user.language || 'en';

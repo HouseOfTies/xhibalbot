@@ -6,7 +6,7 @@ import { Module } from '@nestjs/common';
 import { I18nService } from './services/i18n/i18n.service';
 import { ExperienceService } from './services/experience/experience.service';
 import { ProgressionService } from './services/progression/progression.service';
-import { UserModule } from 'src/Modules/user/user.module';
+import { UserModule } from 'src/Modules/player/player.module';
 
 @Module({
   imports: [UserModule],

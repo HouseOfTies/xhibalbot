@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-export type UserDocument = User & Document;
+export type PlayerDocument = Player & Document;
 
 @Schema({ timestamps: true })
-export class User {
+export class Player {
   @Prop({ required: true, unique: true })
   userId: string;
 
@@ -45,4 +45,4 @@ export class User {
   crystalCoins: number;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+export const PlayerSchema = SchemaFactory.createForClass(Player);

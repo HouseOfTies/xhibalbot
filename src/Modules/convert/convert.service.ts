@@ -1,9 +1,9 @@
 import { Command, Ctx, Update } from 'nestjs-telegraf';
-import { UserService } from 'src/Modules/user/user.service';
+import { PlayerService } from 'src/Modules/player/player.service';
 
 @Update()
 export class ConvertCommand {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly playerService: PlayerService) {}
 
   @Command('convert')
   async onConvertCommand(@Ctx() ctx: any) {
@@ -25,7 +25,7 @@ export class ConvertCommand {
       return ctx.reply('❌ Invalid arguments. Use /convert gold 500.');
     }
 
-    const user = await this.userService.getUser(userId);
+    const user = await this.playerService.getUser(userId);
     if (!user) {
       return ctx.reply('❌ User not found.');
     }
