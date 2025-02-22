@@ -8,6 +8,11 @@ import { RegisterMiddleware } from 'src/middleware/register.middleware';
 import { MineModule } from 'src/Modules/mine/mine.module';
 import { GreeterModule } from 'src/Modules/greeter/greeter.module';
 import { HuntModule } from 'src/Modules/hunt/hunt.module';
+import { MonstersModule } from 'src/Modules/monsters/monsters.module';
+import { ConvertModule } from 'src/Modules/convert/convert.module';
+import { LangModule } from 'src/Modules/lang/lang.module';
+import { ShareModule } from 'src/share/share.module';
+import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
   imports: [
@@ -16,6 +21,11 @@ import { HuntModule } from 'src/Modules/hunt/hunt.module';
     GreeterModule,
     UserModule,
     HuntModule,
+    MonstersModule,
+    ConvertModule,
+    LangModule,
+    ShareModule,
+    DatabaseModule,
     TelegrafModule.forRootAsync({
       botName: 'XhibalbaBot',
       imports: [UserModule],

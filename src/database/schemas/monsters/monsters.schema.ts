@@ -91,12 +91,15 @@ export class Monster {
     };
   };
 
-  @Prop([
-    {
-      type: String,
-      percent: Number,
-    },
-  ])
+  @Prop({
+    type: [
+      {
+        type: { type: String, required: true },
+        percent: { type: Number, required: true },
+      },
+    ],
+    required: true,
+  })
   elements: { type: string; percent: number }[];
 
   @Prop([{ type: String }])
