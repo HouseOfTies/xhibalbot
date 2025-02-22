@@ -6,7 +6,7 @@ import { Module } from '@nestjs/common';
 import { LanguageCommand } from './lang.service';
 import { PlayerService } from '../player/player.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Player, PlayerSchema } from 'src/database/schemas/player.schema';
+import { Player, PlayerSchema } from 'src/database/schemas/player/player.schema';
 
 @Module({
   imports: [
