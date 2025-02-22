@@ -25,30 +25,30 @@ export class ConvertCommand {
       return ctx.reply('❌ Invalid arguments. Use /convert gold 500.');
     }
 
-    const user = await this.playerService.getUser(userId);
-    if (!user) {
-      return ctx.reply('❌ User not found.');
+    const player = await this.playerService.getUser(userId);
+    if (!player) {
+      return ctx.reply('❌ Player not found.');
     }
 
     let message: string;
 
     if (from === 'gold') {
-      if (user.goldCoins < amountNum) {
+      if (player.goldCoins < amountNum) {
         return ctx.reply('❌ Not enough Gold Coins.');
       }
-      user.goldCoins -= amountNum;
-      user.platinumCoins += Math.floor(amountNum / 100);
+      player.goldCoins -= amountNum;
+      player.platinumCoins += Math.floor(amountNum / 100);
       message = `✅ Successfully converted ${amountNum} Gold Coins to ${Math.floor(amountNum / 100)} Platinum Coins.`;
     } else if (from === 'platinum') {
-      if (user.platinumCoins < amountNum) {
+      if (player.platinumCoins < amountNum) {
         return ctx.reply('❌ Not enough Platinum Coins.');
       }
-      user.platinumCoins -= amountNum;
-      user.crystalCoins += Math.floor(amountNum / 100);
+      player.platinumCoins -= amountNum;
+      player.crystalCoins += Math.floor(amountNum / 100);
       message = `✅ Successfully converted ${amountNum} Platinum Coins to ${Math.floor(amountNum / 100)} Crystal Coins.`;
     }
 
-    await user.save();
+    await player.save();
     ctx.reply(message);
     return;
   }

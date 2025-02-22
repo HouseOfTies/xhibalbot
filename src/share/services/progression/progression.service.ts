@@ -24,17 +24,17 @@ export class ProgressionService {
 
     const lang = user.language || 'en';
 
-    user.exp += exp;
+    user.experience += exp;
     user.goldCoins += gold;
-    user.miningExp += miningExp;
+    user.miningExperience += miningExp;
 
     let levelUpMessage = '';
     let miningLevelUpMessage = '';
 
     const requiredExp = this.experienceService.getRequiredExp(user.level);
-    if (user.exp >= requiredExp) {
+    if (user.experience >= requiredExp) {
       user.level += 1;
-      user.exp = 0;
+      user.experience = 0;
       levelUpMessage = this.i18nService.translate(
         lang,
         'commands.progression.levelUp',
@@ -47,9 +47,9 @@ export class ProgressionService {
     const requiredMiningExp = this.experienceService.getRequiredMiningExp(
       user.miningLevel,
     );
-    if (user.miningExp >= requiredMiningExp) {
+    if (user.miningExperience >= requiredMiningExp) {
       user.miningLevel += 1;
-      user.miningExp = 0;
+      user.miningExperience = 0;
       miningLevelUpMessage = this.i18nService.translate(
         lang,
         'commands.progression.miningLevelUp',

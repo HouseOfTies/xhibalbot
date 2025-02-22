@@ -23,16 +23,16 @@ export class MineCommands {
   @Command('mine')
   async onMineCommand(@Ctx() ctx: Context) {
     const userId = ctx.from.id.toString();
-    const user = await this.progressionService.playerService.getUser(userId);
-    if (!user) return;
+    const player = await this.progressionService.playerService.getUser(userId);
+    if (!player) return;
 
-    const lang = user.language || 'en';
-    const cooldownSeconds = this.calculateCooldown(user.level);
+    const lang = player.language || 'en';
+    const cooldownSeconds = this.calculateCooldown(player.level);
 
     if (!(await this.checkCooldown(ctx, userId, cooldownSeconds, lang))) return;
 
     await this.startMining(ctx, lang);
-    await this.processMiningResults(ctx, user, lang);
+    await this.processMiningResults(ctx, player, lang);
     await this.notifyCooldown(ctx, lang, cooldownSeconds);
   }
 
@@ -69,45 +69,33 @@ export class MineCommands {
 
   private async processMiningResults(
     ctx: Context,
-    user: any,
+    player: any,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     lang: string,
   ): Promise<void> {
     const goldEarned = this.calculateEarnings(
-      user.miningLevel,
+      player.miningLevel,
       this.GOLD_MIN,
       this.GOLD_MAX,
     );
     const expEarned = this.calculateEarnings(
-      user.miningLevel,
+      player.miningLevel,
       this.EXP_MIN,
       this.EXP_MAX,
     );
     const miningExpEarned = this.calculateEarnings(
-      user.miningLevel,
+      player.miningLevel,
       this.MINING_EXP_MIN,
       this.MINING_EXP_MAX,
     );
 
     await this.progressionService.updateProgress(
-      user.userId,
+      player.userId,
       ctx,
       expEarned,
       goldEarned,
       miningExpEarned,
     );
-
-    /* const lootMessage = this.i18nService.translate(lang, 'commands.mine.loot', {
-      gold: goldEarned,
-      exp: expEarned,
-      miningExp: miningExpEarned,
-    });
- */
-    /* await ctx.reply(
-      this.i18nService.translate(lang, 'commands.mine.complete', {
-        loot: lootMessage,
-      }),
-    ); */
   }
 
   private calculateEarnings(level: number, min: number, max: number): number {

@@ -36,7 +36,7 @@ export class Player {
   magLevel: number;
 
   @Prop({ default: 0 })
-  manaSpent: number;
+  magLevelExp: number;
 
   @Prop({ default: 400 })
   cap: number;
@@ -80,6 +80,12 @@ export class Player {
   @Prop({ default: 0 })
   synergyMana: number;
 
+  @Prop({ default: 100 })
+  synergyManaMax: number;
+
+  @Prop({ default: false })
+  inCombat: boolean;
+
   @Prop({
     type: [{ type: Types.ObjectId, ref: 'player_invocation_spirit' }],
     maxlength: 3,
@@ -92,6 +98,18 @@ export class Player {
     default: null,
   })
   selectedInvocationSpirit: Types.ObjectId | null;
+
+  @Prop({ default: 0 })
+  goldCoins: number;
+
+  @Prop({ default: 0 })
+  platinumCoins: number;
+
+  @Prop({ default: 0 })
+  crystalCoins: number;
+
+  @Prop({ default: 'en' })
+  language: string;
 }
 
 export const PlayerSchema = SchemaFactory.createForClass(Player);
