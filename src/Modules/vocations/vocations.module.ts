@@ -3,13 +3,8 @@ https://docs.nestjs.com/modules
 */
 
 import { Module } from '@nestjs/common';
-import { LanguageCommand } from './lang.service';
-import { PlayerService } from '../player/player.service';
+import { VocationSeederService } from './vocations.seeder';
 import { MongooseModule } from '@nestjs/mongoose';
-import {
-  Player,
-  PlayerSchema,
-} from 'src/database/schemas/player/player.schema';
 import {
   Vocation,
   VocationSchema,
@@ -18,12 +13,11 @@ import {
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: Player.name, schema: PlayerSchema },
       { name: Vocation.name, schema: VocationSchema },
     ]),
   ],
   controllers: [],
-  providers: [PlayerService, LanguageCommand],
-  exports: [PlayerService],
+  providers: [VocationSeederService],
+  exports: [VocationSeederService],
 })
-export class LangModule {}
+export class VocationsModule {}

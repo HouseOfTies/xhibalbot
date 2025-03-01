@@ -1,4 +1,4 @@
-import { Command, Ctx, Update, Action } from 'nestjs-telegraf';
+import { Command, Ctx, Update } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { PlayerService } from '../player/player.service';
 import { ExperienceService } from 'src/share/services/experience/experience.service';
@@ -18,49 +18,42 @@ export class HuntService {
   async onHuntCommand(@Ctx() ctx: Context) {
     const userId = ctx.from.id.toString();
 
-    // ⏳ Verificar si el usuario está en cooldown
     const cooldown = await this.cooldownService.checkCooldown(
       userId,
       'hunt',
-      60,
+      10,
     );
     if (!cooldown.allowed) {
-      return ctx.reply(
+      ctx.reply(
         `⏳ Estás en cooldown. Intenta de nuevo en ${cooldown.timeRemaining} segundos.`,
       );
+      return;
     }
 
     const player = await this.playerService.findOrCreate(userId);
 
     if (player.inCombat) {
-      return ctx.reply(
+      ctx.reply(
         '⚔️ ¡Estás en medio de un combate! Usa los botones para continuar.',
       );
+      return;
     }
 
     if (Math.random() > 0.7) {
+      ctx.reply('🌿 No has encontrado nada... intenta de nuevo más tarde.');
       await this.cooldownService.resetCooldown(userId, 'hunt');
-      return ctx.reply(
-        '🌿 No has encontrado nada... intenta de nuevo en 60 segundos.',
-      );
+      return;
     }
 
-    // 🔎 Buscar un monstruo acorde al nivel del jugador
     const monster = await this.monsterService.findMonsterForLevel(player.level);
+
     if (!monster) {
       return ctx.reply('❌ No hay monstruos disponibles para tu nivel.');
     }
 
-    // ⚔️ Guardar estado de combate
-    await this.playerService.startCombat(userId, monster);
+    const monsterMessage = `🔥 **¡${monster.name} [Level: ${monster.generatedLevel}] ha aparecido!** 🔥`;
 
-    // 📢 Mensaje de aparición del monstruo
-    const monsterMessage = `🔥 **¡Un ${monster.name} ha aparecido!** 🔥  
-   🆚 Nivel: ${monster.levelRange.min} - ${monster.levelRange.max}  
-   
-⚔️ **¿Qué quieres hacer?**`;
-
-    // Botones de acción
+    //await this.playerService.startCombat(userId, monster);
     ctx.reply(
       monsterMessage,
       Markup.inlineKeyboard([

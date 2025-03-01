@@ -6,6 +6,9 @@ import {
   MonsterDocument,
 } from 'src/database/schemas/monsters/monsters.schema';
 import { MonsterSeeder } from './monsters.seeder';
+interface MonsterWithLevel extends Monster {
+  generatedLevel: number;
+}
 
 @Injectable()
 export class MonsterService implements OnModuleInit {
@@ -29,21 +32,30 @@ export class MonsterService implements OnModuleInit {
     return this.monsterModel.findById(id).exec();
   }
 
-  async findMonsterForLevel(playerLevel: number): Promise<Monster | null> {
+  async findMonsterForLevel(
+    playerLevel: number,
+  ): Promise<MonsterWithLevel | null> {
     const availableMonsters = await this.monsterModel
       .find({
-        'levelRange.min': { $lte: playerLevel }, // Mínimo nivel del monstruo <= nivel del jugador
-        'levelRange.max': { $gte: playerLevel }, // Máximo nivel del monstruo >= nivel del jugador
+        'levelRange.min': { $lte: playerLevel },
+        'levelRange.max': { $gte: playerLevel },
       })
       .exec();
 
     if (availableMonsters.length === 0) {
-      return null; // No hay monstruos en ese rango de nivel
+      return null;
     }
 
-    // Seleccionar un monstruo aleatorio de los disponibles
-    return availableMonsters[
-      Math.floor(Math.random() * availableMonsters.length)
-    ];
+    const monster =
+      availableMonsters[Math.floor(Math.random() * availableMonsters.length)];
+
+    const generatedLevel =
+      Math.floor(
+        Math.random() * (monster.levelRange.max - monster.levelRange.min + 1),
+      ) + monster.levelRange.min;
+
+    return Object.assign(monster.toObject(), {
+      generatedLevel,
+    }) as MonsterWithLevel;
   }
 }

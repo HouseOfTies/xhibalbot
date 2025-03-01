@@ -110,6 +110,9 @@ export class Player {
 
   @Prop({ default: 'en' })
   language: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'Vocation', required: true })
+  vocation: Types.ObjectId;
 }
 
 export const PlayerSchema = SchemaFactory.createForClass(Player);

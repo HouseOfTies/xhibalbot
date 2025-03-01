@@ -14,7 +14,7 @@ export class PlayerProfileCommand {
   async onProfileCommand(@Ctx() ctx: Context) {
     const userId = ctx.from.id.toString();
 
-    const player = await this.playerService.findOrCreate(userId);
+    const player = await this.playerService.getPlayerWithVocationName(userId);
 
     const requiredExp = this.experienceService.getRequiredExp(player.level);
     const expPercentage =
@@ -38,7 +38,7 @@ export class PlayerProfileCommand {
    - 💵 **Platinum Coins:** ${player.platinumCoins}  
    - 💎 **Crystal Coins:** ${player.crystalCoins}  
 
-⚔ **Vocation:** ${player.vocationId || 'Not Defined'}  
+⚔ **Vocation:** ${player.vocationName}  
 
 🌎 **Language:** ${player.language.toUpperCase()}  
 `;

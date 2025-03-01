@@ -13,6 +13,7 @@ import { ConvertModule } from 'src/Modules/convert/convert.module';
 import { LangModule } from 'src/Modules/lang/lang.module';
 import { ShareModule } from 'src/share/share.module';
 import { DatabaseModule } from 'src/database/database.module';
+import { VocationsModule } from 'src/Modules/vocations/vocations.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { DatabaseModule } from 'src/database/database.module';
     LangModule,
     ShareModule,
     DatabaseModule,
+    VocationsModule,
     TelegrafModule.forRootAsync({
       botName: 'XhibalbaBot',
       imports: [UserModule],

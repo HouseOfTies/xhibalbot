@@ -12,11 +12,17 @@ import { PlayerProfileCommand } from './player-commands.service';
 import { ExperienceService } from 'src/share/services/experience/experience.service';
 import { PlayerService } from './player.service';
 import { PlayerSkillsService } from './skills.service';
-import { HuntService } from '../hunt/hunt.service';
+import {
+  Vocation,
+  VocationSchema,
+} from 'src/database/schemas/vocations/vocations.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Player.name, schema: PlayerSchema }]),
+    MongooseModule.forFeature([
+      { name: Player.name, schema: PlayerSchema },
+      { name: Vocation.name, schema: VocationSchema },
+    ]),
   ],
   controllers: [],
   providers: [

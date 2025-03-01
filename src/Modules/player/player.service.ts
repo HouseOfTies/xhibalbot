@@ -5,24 +5,41 @@ import {
   Player,
   PlayerDocument,
 } from 'src/database/schemas/player/player.schema';
+import {
+  Vocation,
+  VocationDocument,
+} from 'src/database/schemas/vocations/vocations.schema';
 
 @Injectable()
 export class PlayerService {
   constructor(
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
+    @InjectModel(Vocation.name) private vocationModel: Model<VocationDocument>,
   ) {}
 
-  async findOrCreate(userId: string): Promise<Player> {
-    let user = await this.playerModel.findOne({ userId });
+  async findOrCreate(userId: string) {
+    let player = await this.playerModel.findOne({ userId });
 
-    if (!user) {
-      user = new this.playerModel({
-        userId,
+    if (!player) {
+      const defaultVocation = await this.vocationModel.findOne({
+        vocationId: 0,
       });
-      await user.save();
+
+      if (!defaultVocation) {
+        throw new Error(
+          'Default vocation (Normal Human) not found in database.',
+        );
+      }
+
+      player = new this.playerModel({
+        userId,
+        vocation: defaultVocation._id,
+      });
+
+      await player.save();
     }
 
-    return user;
+    return player;
   }
 
   async getUser(userId: string): Promise<PlayerDocument | null> {
@@ -38,27 +55,38 @@ export class PlayerService {
       .exec();
   }
 
+  async getPlayerWithVocationName(userId: string) {
+    const player = await this.findOrCreate(userId);
+
+    const vocation = await this.vocationModel
+      .findById(player.vocation)
+      .select('name');
+
+    return {
+      ...player.toObject(),
+      vocationName: vocation ? vocation.name : 'Not Defined',
+    };
+  }
+
   async updateLanguage(userId: string, language: 'en' | 'es'): Promise<void> {
     await this.playerModel.updateOne({ userId }, { $set: { language } });
   }
 
-  // ✅ Iniciar combate, guardando el monstruo actual
   async startCombat(userId: string, monster: any): Promise<void> {
     const player = await this.getUser(userId);
-    const currentHealth = player ? player.health : 100; // Si no hay player, usa 100 de vida por defecto
+    const currentHealth = player ? player.health : 100;
     await this.playerModel.updateOne(
       { userId },
       {
         $set: {
           inCombat: true,
           currentMonster: monster._id,
-          health: Math.max(1, currentHealth), // Evita que el jugador inicie el combate con 0 de vida
+          health: Math.max(1, currentHealth),
         },
       },
     );
   }
 
-  // ✅ Terminar combate y limpiar estado
   async endCombat(userId: string): Promise<void> {
     await this.playerModel.updateOne(
       { userId },
@@ -71,7 +99,6 @@ export class PlayerService {
     );
   }
 
-  // ✅ Actualizar la vida del jugador
   async updatePlayerHealth(userId: string, newHealth: number): Promise<void> {
     await this.playerModel.updateOne(
       { userId },
@@ -79,19 +106,17 @@ export class PlayerService {
     );
   }
 
-  // ✅ Restar experiencia si el jugador muere
   async loseExp(userId: string, amount: number): Promise<void> {
     const player = await this.getUser(userId);
     if (!player) return;
 
-    const newExp = Math.max(0, player.experience - amount); // No puede bajar de 0
+    const newExp = Math.max(0, player.experience - amount);
     await this.playerModel.updateOne(
       { userId },
       { $set: { experience: newExp } },
     );
   }
 
-  // ✅ Sumar experiencia si el jugador gana
   async gainExp(userId: string, amount: number): Promise<void> {
     const player = await this.getUser(userId);
     if (!player) return;

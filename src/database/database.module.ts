@@ -4,12 +4,16 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseService } from './database.service';
 import { Player, PlayerSchema } from './schemas/player/player.schema';
 import { PlayerService } from 'src/Modules/player/player.service';
+import { Vocation, VocationSchema } from './schemas/vocations/vocations.schema';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGO_URI),
-    MongooseModule.forFeature([{ name: Player.name, schema: PlayerSchema }]),
+    MongooseModule.forFeature([
+      { name: Player.name, schema: PlayerSchema },
+      { name: Vocation.name, schema: VocationSchema },
+    ]),
   ],
   exports: [MongooseModule],
   providers: [DatabaseService, PlayerService],
