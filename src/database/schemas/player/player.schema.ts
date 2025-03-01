@@ -113,6 +113,38 @@ export class Player {
 
   @Prop({ type: Types.ObjectId, ref: 'Vocation', required: true })
   vocation: Types.ObjectId;
+
+  @Prop({
+    type: {
+      monsterId: { type: Types.ObjectId, ref: 'Monster' },
+      name: String,
+      maxHealth: Number,
+      currentHealth: Number,
+      experience: Number,
+      attacks: [
+        {
+          name: String,
+          interval: Number,
+          minDamage: Number,
+          maxDamage: Number,
+        },
+      ],
+    },
+    default: null,
+  })
+  currentMonster: {
+    monsterId: Types.ObjectId;
+    name: string;
+    maxHealth: number;
+    currentHealth: number;
+    experience: number;
+    attacks: {
+      name: string;
+      interval: number;
+      minDamage: number;
+      maxDamage: number;
+    }[];
+  } | null;
 }
 
 export const PlayerSchema = SchemaFactory.createForClass(Player);

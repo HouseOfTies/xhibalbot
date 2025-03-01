@@ -1,7 +1,6 @@
-import { Command, Ctx, Update } from 'nestjs-telegraf';
+import { Action, Command, Ctx, Update } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { PlayerService } from '../player/player.service';
-import { ExperienceService } from 'src/share/services/experience/experience.service';
 import { MonsterService } from '../monsters/monsters.service';
 import { RedisCooldownService } from 'src/cache/rediscooldown.service';
 
@@ -10,7 +9,6 @@ export class HuntService {
   constructor(
     private playerService: PlayerService,
     private monsterService: MonsterService,
-    private experienceService: ExperienceService,
     private cooldownService: RedisCooldownService,
   ) {}
 
@@ -25,7 +23,8 @@ export class HuntService {
     );
     if (!cooldown.allowed) {
       ctx.reply(
-        `⏳ Estás en cooldown. Intenta de nuevo en ${cooldown.timeRemaining} segundos.`,
+        `⏳ *Estás en cooldown.*\nIntenta de nuevo en *${cooldown.timeRemaining} segundos.*`,
+        { parse_mode: 'Markdown' },
       );
       return;
     }
@@ -34,104 +33,128 @@ export class HuntService {
 
     if (player.inCombat) {
       ctx.reply(
-        '⚔️ ¡Estás en medio de un combate! Usa los botones para continuar.',
+        '⚔️ *¡Ya estás en medio de un combate!*\nUsa los botones para continuar.',
+        { parse_mode: 'Markdown' },
       );
       return;
     }
 
     if (Math.random() > 0.7) {
-      ctx.reply('🌿 No has encontrado nada... intenta de nuevo más tarde.');
+      ctx.reply('🌿 *No has encontrado nada...*\nIntenta de nuevo más tarde.', {
+        parse_mode: 'Markdown',
+      });
       await this.cooldownService.resetCooldown(userId, 'hunt');
       return;
     }
 
     const monster = await this.monsterService.findMonsterForLevel(player.level);
-
     if (!monster) {
-      return ctx.reply('❌ No hay monstruos disponibles para tu nivel.');
+      ctx.reply('❌ *No hay monstruos disponibles para tu nivel.*', {
+        parse_mode: 'Markdown',
+      });
+
+      return;
     }
 
-    const monsterMessage = `🔥 **¡${monster.name} [Level: ${monster.generatedLevel}] ha aparecido!** 🔥`;
+    await this.playerService.startCombat(userId, monster);
 
-    //await this.playerService.startCombat(userId, monster);
     ctx.reply(
-      monsterMessage,
-      Markup.inlineKeyboard([
-        [Markup.button.callback('⚔️ Atacar', `attack_${userId}`)],
-        [Markup.button.callback('🏃 Huir', `flee_${userId}`)],
-      ]),
+      `🔥 *¡${monster.name} [Level: ${monster.generatedLevel}] ha aparecido!* 🔥\n\n` +
+        `⚔️ *Opciones de combate:*`,
+      {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+          [Markup.button.callback('⚔️ Atacar', `attack_${userId}`)],
+          [Markup.button.callback('🏃 Huir', `flee_${userId}`)],
+        ]),
+      },
     );
   }
 
-  /* // Acción de ataque
   @Action(/attack_(.+)/)
   async onAttack(@Ctx() ctx: Context) {
-    const userId = ctx.match[1];
-    const player = await this.playerService.findById(userId);
+    const userId = (ctx as any).match[1];
 
-    if (!player || !player.inCombat) {
-      return ctx.reply('❌ No estás en un combate.');
+    const player = await this.playerService.getUser(userId);
+    if (!player || !player.inCombat || !player.currentMonster) {
+      ctx.reply('❌ *No estás en un combate.*', {
+        parse_mode: 'Markdown',
+      });
+
+      return;
     }
 
-    const monster = await this.monsterService.findById(player.currentMonster);
-    if (!monster) {
-      return ctx.reply('❌ Error al recuperar el monstruo.');
-    }
+    const monster = player.currentMonster;
 
-    // 🎯 Calcular daño del jugador
     const playerDamage = Math.floor(Math.random() * 10) + 5;
-    monster.currentHealth -= playerDamage;
+    const updatedMonster = await this.playerService.updateMonsterHealth(
+      userId,
+      playerDamage,
+    );
 
-    // 🐉 Calcular daño del monstruo
-    const monsterDamage =
-      Math.floor(
-        Math.random() *
-          (monster.attacks[0].maxDamage - monster.attacks[0].minDamage),
-      ) + monster.attacks[0].minDamage;
-    player.health -= monsterDamage;
-
-    // Guardar cambios en la base de datos
-    await this.monsterService.updateMonsterHealth(monster);
-    await this.playerService.updatePlayerHealth(player);
-
-    // 💀 Verificar si alguien murió
-    if (player.health <= 0) {
-      await this.playerService.endCombat(userId);
-      await this.playerService.loseExp(userId, 100); // Pierde 100 de experiencia
-      return ctx.reply(
-        `💀 Has sido derrotado por el ${monster.name}. Pierdes experiencia...`,
-      );
-    }
-
-    if (monster.currentHealth <= 0) {
+    if (updatedMonster.currentHealth <= 0) {
       await this.playerService.endCombat(userId);
       await this.playerService.gainExp(userId, monster.experience);
-      return ctx.reply(
-        `🏆 ¡Has vencido al ${monster.name}! Ganas ${monster.experience} de experiencia.`,
+      ctx.reply(
+        `🏆 *¡Has vencido al ${monster.name}!* 🎉\nGanas *${monster.experience}* de experiencia.`,
+        { parse_mode: 'Markdown' },
       );
+
+      return;
     }
 
-    // ⚔️ Si ambos siguen vivos, continuar el combate
-    return ctx.reply(
-      `⚔️ **Atacaste al ${monster.name} e hiciste ${playerDamage} de daño.**  
-💀 **El ${monster.name} te atacó e hizo ${monsterDamage} de daño.**  
-❤️ **Tu vida:** ${player.health}  
-🐉 **Vida del ${monster.name}:** ${monster.currentHealth}  
+    const monsterAttack =
+      monster.attacks[Math.floor(Math.random() * monster.attacks.length)];
+    const monsterDamage =
+      Math.floor(
+        Math.random() * (monsterAttack.maxDamage - monsterAttack.minDamage),
+      ) + monsterAttack.minDamage;
 
-⚔️ **¿Qué quieres hacer ahora?**`,
-      Markup.inlineKeyboard([
-        [Markup.button.callback('⚔️ Atacar', `attack_${userId}`)],
-        [Markup.button.callback('🏃 Huir', `flee_${userId}`)],
-      ]),
+    const updatedPlayer = await this.playerService.updatePlayerHealth(
+      userId,
+      monsterDamage,
     );
+
+    if (updatedPlayer.health <= 0) {
+      await this.playerService.endCombat(userId);
+      await this.playerService.loseExp(userId, 100);
+      ctx.reply(
+        `💀 *Has sido derrotado por el ${monster.name}.*\nPierdes experiencia...`,
+        { parse_mode: 'Markdown' },
+      );
+
+      return;
+    }
+
+    ctx.reply(
+      `⚔️ *Atacaste a: ${monster.name} e hiciste ${playerDamage} de daño.*  
+💀 *${monster.name} te atacó e hizo ${monsterDamage} de daño.*
+
+---
+❤️ *Tu vida:* ${updatedPlayer.health}  
+🐉 *Vida del ${monster.name}:* ${updatedMonster.currentHealth}
+---
+
+⚔️ *¿Qué quieres hacer ahora?*`,
+      {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+          [Markup.button.callback('⚔️ Atacar', `attack_${userId}`)],
+          [Markup.button.callback('🏃 Huir', `flee_${userId}`)],
+        ]),
+      },
+    );
+    return;
   }
 
-  // Acción de huir
   @Action(/flee_(.+)/)
   async onFlee(@Ctx() ctx: Context) {
-    const userId = ctx.match[1];
+    const userId = (ctx as any).match[1];
 
     await this.playerService.endCombat(userId);
-    return ctx.reply('🏃 ¡Has huido del combate sin consecuencias!');
-  } */
+    ctx.reply('🏃 *¡Has huido del combate sin consecuencias!*', {
+      parse_mode: 'Markdown',
+    });
+    return;
+  }
 }

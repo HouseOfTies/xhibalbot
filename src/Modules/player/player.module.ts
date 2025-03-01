@@ -16,12 +16,17 @@ import {
   Vocation,
   VocationSchema,
 } from 'src/database/schemas/vocations/vocations.schema';
+import {
+  Monster,
+  MonsterSchema,
+} from 'src/database/schemas/monsters/monsters.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Player.name, schema: PlayerSchema },
       { name: Vocation.name, schema: VocationSchema },
+      { name: Monster.name, schema: MonsterSchema },
     ]),
   ],
   controllers: [],

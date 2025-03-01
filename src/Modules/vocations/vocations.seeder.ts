@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { VOCATIONS } from './vocations-data';
+import { VOCATIONS } from 'src/database/data/vocations-data';
 import {
   Vocation,
   VocationDocument,
