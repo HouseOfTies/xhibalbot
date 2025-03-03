@@ -14,10 +14,10 @@ export class Player {
   @Prop({ default: 150 })
   healthMax: number;
 
-  @Prop({ default: 0 })
+  @Prop({ default: 150 })
   mana: number;
 
-  @Prop({ default: 0 })
+  @Prop({ default: 150 })
   manaMax: number;
 
   @Prop({ default: 1 })
@@ -145,6 +145,12 @@ export class Player {
       maxDamage: number;
     }[];
   } | null;
+
+  @Prop({ default: null })
+  combatMessageId: number | null;
+
+  @Prop({ default: null })
+  lastCombatEndedAt: Date | null;
 }
 
 export const PlayerSchema = SchemaFactory.createForClass(Player);

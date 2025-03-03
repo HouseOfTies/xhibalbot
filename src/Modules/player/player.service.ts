@@ -22,7 +22,6 @@ export class PlayerService {
     @InjectModel(Monster.name) private monsterModel: Model<MonsterDocument>,
   ) {}
 
-  /** ✅ Encuentra o crea un jugador nuevo con valores por defecto del Schema **/
   async findOrCreate(userId: string) {
     let player = await this.playerModel.findOne({ userId });
 
@@ -39,7 +38,7 @@ export class PlayerService {
 
       player = new this.playerModel({
         userId,
-        vocation: defaultVocation._id, // Solo asignamos vocación, lo demás usa valores por defecto del Schema
+        vocation: defaultVocation._id,
       });
 
       await player.save();
@@ -48,12 +47,10 @@ export class PlayerService {
     return player;
   }
 
-  /** ✅ Obtiene un jugador por ID */
   async getUser(userId: string): Promise<PlayerDocument | null> {
     return this.playerModel.findOne({ userId }).exec();
   }
 
-  /** ✅ Actualiza los datos de un jugador */
   async updateUser(
     userId: string,
     updateData: Partial<Player>,
@@ -63,7 +60,6 @@ export class PlayerService {
       .exec();
   }
 
-  /** ✅ Obtiene un jugador con el nombre de su vocación */
   async getPlayerWithVocationName(userId: string) {
     const player = await this.findOrCreate(userId);
     const vocation = await this.vocationModel
@@ -76,12 +72,10 @@ export class PlayerService {
     };
   }
 
-  /** ✅ Permite cambiar el idioma del jugador */
   async updateLanguage(userId: string, language: 'en' | 'es'): Promise<void> {
     await this.playerModel.updateOne({ userId }, { $set: { language } });
   }
 
-  /** ✅ Inicia un combate asignando el monstruo al jugador */
   async startCombat(userId: string, monster: any): Promise<void> {
     const player = await this.getUser(userId);
     if (!player) return;
@@ -104,7 +98,6 @@ export class PlayerService {
     );
   }
 
-  /** ✅ Termina el combate, limpiando la sesión */
   async endCombat(userId: string): Promise<void> {
     await this.playerModel.updateOne(
       { userId },
@@ -112,12 +105,12 @@ export class PlayerService {
         $set: {
           inCombat: false,
           currentMonster: null,
+          lastCombatEndedAt: new Date(),
         },
       },
     );
   }
 
-  /** ✅ Actualiza la salud del jugador */
   async updatePlayerHealth(
     userId: string,
     damage: number,
@@ -128,7 +121,6 @@ export class PlayerService {
     return player;
   }
 
-  /** ✅ Actualiza la salud del monstruo */
   async updateMonsterHealth(userId: string, damage: number): Promise<any> {
     const player = await this.findOrCreate(userId);
     if (!player.currentMonster) return null;
@@ -142,7 +134,6 @@ export class PlayerService {
     return player.currentMonster;
   }
 
-  /** ✅ Maneja pérdida de experiencia */
   async loseExp(userId: string, amount: number): Promise<void> {
     const player = await this.getUser(userId);
     if (!player) return;
@@ -154,14 +145,12 @@ export class PlayerService {
     );
   }
 
-  /** ✅ Maneja ganancia de experiencia y subida de nivel */
   async gainExp(userId: string, amount: number): Promise<void> {
     const player = await this.getUser(userId);
     if (!player) return;
 
     player.experience += amount;
 
-    // Verificar si sube de nivel
     const nextLevelExp = this.getRequiredExp(player.level);
     if (player.experience >= nextLevelExp) {
       player.level += 1;
@@ -179,8 +168,52 @@ export class PlayerService {
     await player.save();
   }
 
-  /** ✅ Calcula la experiencia requerida para subir de nivel */
   getRequiredExp(level: number): number {
-    return level * 100; // Por ahora, simple fórmula de progresión lineal
+    return level * 100;
+  }
+
+  async updateCombatMessageId(
+    userId: string,
+    messageId: number,
+  ): Promise<void> {
+    await this.playerModel.updateOne(
+      { userId },
+      { $set: { combatMessageId: messageId } },
+    );
+  }
+
+  async regenerateStats(): Promise<void> {
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+    const players = await this.playerModel
+      .find({
+        lastCombatEndedAt: { $lte: twoMinutesAgo },
+        $or: [
+          { $expr: { $lt: ['$health', '$healthMax'] } },
+          { $expr: { $lt: ['$mana', '$manaMax'] } },
+        ],
+      })
+      .populate('vocation');
+
+    for (const player of players) {
+      const vocation = player.vocation as any;
+
+      if (!vocation) continue;
+
+      const newHealth = Math.min(
+        player.health + vocation.gainHpAmount,
+        player.healthMax,
+      );
+      const newMana = Math.min(
+        player.mana + vocation.gainManaAmount,
+        player.manaMax,
+      );
+
+      await this.playerModel.updateOne(
+        { _id: player._id },
+        {
+          $set: { health: newHealth, mana: newMana },
+        },
+      );
+    }
   }
 }

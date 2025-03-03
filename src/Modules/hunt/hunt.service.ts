@@ -15,7 +15,6 @@ export class HuntService {
   @Command('hunt')
   async onHuntCommand(@Ctx() ctx: Context) {
     const userId = ctx.from.id.toString();
-
     const cooldown = await this.cooldownService.checkCooldown(
       userId,
       'hunt',
@@ -30,7 +29,6 @@ export class HuntService {
     }
 
     const player = await this.playerService.findOrCreate(userId);
-
     if (player.inCombat) {
       ctx.reply(
         '⚔️ *¡Ya estás en medio de un combate!*\nUsa los botones para continuar.',
@@ -52,15 +50,13 @@ export class HuntService {
       ctx.reply('❌ *No hay monstruos disponibles para tu nivel.*', {
         parse_mode: 'Markdown',
       });
-
       return;
     }
 
     await this.playerService.startCombat(userId, monster);
 
-    ctx.reply(
-      `🔥 *¡${monster.name} [Level: ${monster.generatedLevel}] ha aparecido!* 🔥\n\n` +
-        `⚔️ *Opciones de combate:*`,
+    const combatMessage = await ctx.reply(
+      `🔥 *¡${monster.name} [Level: ${monster.generatedLevel}] ha aparecido!* 🔥\n\n⚔️ *Opciones de combate:*`,
       {
         parse_mode: 'Markdown',
         ...Markup.inlineKeyboard([
@@ -69,23 +65,26 @@ export class HuntService {
         ]),
       },
     );
+
+    await this.playerService.updateCombatMessageId(
+      userId,
+      combatMessage.message_id,
+    );
+    await this.playerService.updateUser(userId, {
+      combatMessageId: combatMessage.message_id,
+    });
   }
 
   @Action(/attack_(.+)/)
   async onAttack(@Ctx() ctx: Context) {
     const userId = (ctx as any).match[1];
-
     const player = await this.playerService.getUser(userId);
     if (!player || !player.inCombat || !player.currentMonster) {
-      ctx.reply('❌ *No estás en un combate.*', {
-        parse_mode: 'Markdown',
-      });
-
+      ctx.reply('❌ *No estás en un combate.*', { parse_mode: 'Markdown' });
       return;
     }
 
     const monster = player.currentMonster;
-
     const playerDamage = Math.floor(Math.random() * 10) + 5;
     const updatedMonster = await this.playerService.updateMonsterHealth(
       userId,
@@ -99,7 +98,6 @@ export class HuntService {
         `🏆 *¡Has vencido al ${monster.name}!* 🎉\nGanas *${monster.experience}* de experiencia.`,
         { parse_mode: 'Markdown' },
       );
-
       return;
     }
 
@@ -109,7 +107,6 @@ export class HuntService {
       Math.floor(
         Math.random() * (monsterAttack.maxDamage - monsterAttack.minDamage),
       ) + monsterAttack.minDamage;
-
     const updatedPlayer = await this.playerService.updatePlayerHealth(
       userId,
       monsterDamage,
@@ -119,42 +116,42 @@ export class HuntService {
       await this.playerService.endCombat(userId);
       await this.playerService.loseExp(userId, 100);
       ctx.reply(
-        `💀 *Has sido derrotado por el ${monster.name}.*\nPierdes experiencia...`,
+        `💀 *Has sido derrotado por ${monster.name}.*\nPierdes experiencia...`,
         { parse_mode: 'Markdown' },
       );
-
       return;
     }
 
-    ctx.reply(
-      `⚔️ *Atacaste a: ${monster.name} e hiciste ${playerDamage} de daño.*  
-💀 *${monster.name} te atacó e hizo ${monsterDamage} de daño.*
+    try {
+      await ctx.editMessageText(
+        `⚔️ *Atacaste a: ${monster.name} e hiciste ${playerDamage} de daño.*  
+💀 *${monster.name} te atacó e hizo ${monsterDamage} de daño.*  
 
 ---
-❤️ *Tu vida:* ${updatedPlayer.health}  
-🐉 *Vida del ${monster.name}:* ${updatedMonster.currentHealth}
+❤️ *Tu vida:* ${updatedPlayer.health}/${updatedPlayer.healthMax}  
+🐉 *Vida del ${monster.name}:* ${updatedMonster.currentHealth}/${updatedMonster.maxHealth}  
 ---
 
 ⚔️ *¿Qué quieres hacer ahora?*`,
-      {
-        parse_mode: 'Markdown',
-        ...Markup.inlineKeyboard([
-          [Markup.button.callback('⚔️ Atacar', `attack_${userId}`)],
-          [Markup.button.callback('🏃 Huir', `flee_${userId}`)],
-        ]),
-      },
-    );
-    return;
+        {
+          parse_mode: 'Markdown',
+          ...Markup.inlineKeyboard([
+            [Markup.button.callback('⚔️ Atacar', `attack_${userId}`)],
+            [Markup.button.callback('🏃 Huir', `flee_${userId}`)],
+          ]),
+        },
+      );
+    } catch (error) {
+      console.error('Error al editar el mensaje:', error);
+    }
   }
 
   @Action(/flee_(.+)/)
   async onFlee(@Ctx() ctx: Context) {
     const userId = (ctx as any).match[1];
-
     await this.playerService.endCombat(userId);
-    ctx.reply('🏃 *¡Has huido del combate sin consecuencias!*', {
+    ctx.editMessageText('🏃 *¡Has huido del combate sin consecuencias!*', {
       parse_mode: 'Markdown',
     });
-    return;
   }
 }

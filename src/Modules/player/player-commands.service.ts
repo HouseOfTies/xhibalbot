@@ -26,8 +26,8 @@ export class PlayerProfileCommand {
 ⚜️ **Player Profile** ⚜️
 🆔 ${player.userId}
 
-❤️ **HP:** ${player.health} / 100  
-💧 **Mana:** ${player.mana} / 100
+❤️ **HP:** ${player.health} / ${player.healthMax}  
+💧 **Mana:** ${player.mana} / ${player.manaMax}
 ✨ **Synergy Mana:** ${player.synergyMana}  
 
 ⭐ **Level:** ${player.level}  

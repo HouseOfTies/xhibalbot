@@ -20,6 +20,7 @@ import {
   Monster,
   MonsterSchema,
 } from 'src/database/schemas/monsters/monsters.schema';
+import { RegenerationJob } from './regeneration.job';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import {
     PlayerProfileCommand,
     ExperienceService,
     PlayerSkillsService,
+    RegenerationJob,
   ],
   exports: [PlayerService],
 })

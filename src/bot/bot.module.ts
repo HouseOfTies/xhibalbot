@@ -14,6 +14,7 @@ import { LangModule } from 'src/Modules/lang/lang.module';
 import { ShareModule } from 'src/share/share.module';
 import { DatabaseModule } from 'src/database/database.module';
 import { VocationsModule } from 'src/Modules/vocations/vocations.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { VocationsModule } from 'src/Modules/vocations/vocations.module';
     ShareModule,
     DatabaseModule,
     VocationsModule,
+    ScheduleModule.forRoot(),
     TelegrafModule.forRootAsync({
       botName: 'XhibalbaBot',
       imports: [UserModule],
